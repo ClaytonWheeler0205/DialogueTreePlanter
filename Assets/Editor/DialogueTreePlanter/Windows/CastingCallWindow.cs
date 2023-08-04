@@ -28,6 +28,8 @@ namespace DialogueTreePlanter.Windows
 
         private List<SO_Actor> _actors;
 
+        private ActorRenameWindow _actorRenameWindow;
+
         [MenuItem("Window/Dialogue Tree Planter/Casting Call")]
         public static void ShowMyEditor()
         {
@@ -58,9 +60,7 @@ namespace DialogueTreePlanter.Windows
             newActorButton.clicked += () =>
             {
                 _actorFactory.CreateActorAsset();
-                _actors = _actorGatherer.GetActorsList();
-                actorsListView.itemsSource = _actors;
-                actorsListView.RefreshItems();
+                RefreshActorList();
             };
             leftPane.Add(newActorButton);
         }
@@ -117,6 +117,7 @@ namespace DialogueTreePlanter.Windows
             rightPane.Add(actorIconBinding);
             rightPane.Add(actorNameBinding);
             rightPane.Add(actorVoiceBinding);
+            CreateRenameFileButton(actor);
             CreateDeleteActorButton(actor);
         }
 
@@ -128,6 +129,20 @@ namespace DialogueTreePlanter.Windows
             actorVoiceBinding.Unbind();
         }
 
+        private void CreateRenameFileButton(SO_Actor actortoRename)
+        {
+            Button renameFileButton = new Button() { text = "Rename" };
+            renameFileButton.clicked += () =>
+            {
+                //Do something
+                _actorRenameWindow = ActorRenameWindow.ShowWindow() as ActorRenameWindow;
+                _actorRenameWindow.SetActor(actortoRename);
+                _actorRenameWindow.onActorRename += ClearActorEditor;
+                _actorRenameWindow.onActorRename += RefreshActorList;
+            };
+            rightPane.Add(renameFileButton);
+        }
+
         private void CreateDeleteActorButton(SO_Actor actorToDelete)
         {
             Button deleteActorButton = new Button() { text = "Delete" };
@@ -136,11 +151,16 @@ namespace DialogueTreePlanter.Windows
             {
                 ClearActorEditor();
                 _actorDestroyer.DestroyActor(actorToDelete);
-                _actors = _actorGatherer.GetActorsList();
-                actorsListView.itemsSource = _actors;
-                actorsListView.RefreshItems();
+                RefreshActorList();
             };
             rightPane.Add(deleteActorButton);
+        }
+
+        private void RefreshActorList()
+        {
+            _actors = _actorGatherer.GetActorsList();
+            actorsListView.itemsSource = _actors;
+            actorsListView.RefreshItems();
         }
     }
 }
