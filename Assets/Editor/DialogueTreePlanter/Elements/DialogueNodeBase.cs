@@ -6,6 +6,7 @@ using DialogueTreePlanter.Actors;
 using DialogueTreePlanter.Enumerations;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using DialogueTreePlanter.Utilities;
 
 namespace DialogueTreePlanter.Elements
 {
@@ -38,14 +39,12 @@ namespace DialogueTreePlanter.Elements
         public virtual void Draw()
         {
             // Title container
-            TextField dialogueNameTextField = new TextField()
-            {
-                value = _dialogueName
-            };
+            TextField dialogueNameTextField = ElementUtility.CreateTextField(_dialogueName);
 
-            dialogueNameTextField.AddToClassList("dtp-node__textfield");
-            dialogueNameTextField.AddToClassList("dtp-node__filename-textfield");
-            dialogueNameTextField.AddToClassList("dtp-node__textfield__hidden");
+            dialogueNameTextField.AddClasses(
+                "dtp-node__textfield",
+                "dtp-node__filename-textfield",
+                "dtp-node__textfield__hidden");
 
             titleContainer.Insert(0, dialogueNameTextField);
 
@@ -58,26 +57,20 @@ namespace DialogueTreePlanter.Elements
             mainContainer.Insert(1, dialogueActorField);
 
             // Input port
-            Port inputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
-            inputPort.portName = "Dialogue Connection";
+            Port inputPort = this.CreatePort("Dialogue Connection", direction: Direction.Input, capacity: Port.Capacity.Multi);
             inputContainer.Add(inputPort);
 
             // Dialogue Content
             VisualElement customDataContainer = new VisualElement();
             customDataContainer.AddToClassList("dtp-node__custom-data-container");
 
-            Foldout textFoldout = new Foldout()
-            {
-                text = "Dialogue Contents",
-            };
+            Foldout textFoldout = ElementUtility.CreateFoldout("Dialogue Contents");
 
-            TextField dialogueContentTextField = new TextField()
-            {
-                value = _dialogueText
-            };
+            TextField dialogueContentTextField = ElementUtility.CreateTextArea(_dialogueText);
 
-            dialogueContentTextField.AddToClassList("dtp-node__textfield");
-            dialogueContentTextField.AddToClassList("dtp-node__quote-textfield");
+            dialogueContentTextField.AddClasses(
+                "dtp-node__textfield",
+                "dtp-node__quote-textfield");
 
             textFoldout.Add(dialogueContentTextField);
             customDataContainer.Add(textFoldout);

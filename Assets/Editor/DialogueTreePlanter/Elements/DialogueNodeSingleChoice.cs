@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DialogueTreePlanter.Enumerations;
 using UnityEditor.Experimental.GraphView;
+using DialogueTreePlanter.Utilities;
 
 namespace DialogueTreePlanter.Elements
 {
@@ -21,8 +22,7 @@ namespace DialogueTreePlanter.Elements
             base.Draw();
             foreach(string choice in Choices)
             {
-                Port choicePort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
-                choicePort.portName = choice;
+                Port choicePort = this.CreatePort(choice);
                 outputContainer.Add(choicePort);
             }
             RefreshExpandedState();

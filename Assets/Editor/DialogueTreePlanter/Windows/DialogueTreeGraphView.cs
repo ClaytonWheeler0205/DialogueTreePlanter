@@ -1,10 +1,15 @@
 using System;
+using System.Collections.Generic;
+
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
-using UnityEngine.UIElements;
-using DialogueTreePlanter.Elements;
+
 using UnityEngine;
+using UnityEngine.UIElements;
+
+using DialogueTreePlanter.Elements;
 using DialogueTreePlanter.Enumerations;
+using DialogueTreePlanter.Utilities;
 
 namespace DialogueTreePlanter.Windows
 {
@@ -17,16 +22,29 @@ namespace DialogueTreePlanter.Windows
             AddStyles();
         }
 
-        // Dev note: Please move the create node functionality into a factory class
-        private DialogueNodeBase CreateNode(DialogueType dialogueType, Vector2 position)
+        #region Overrided Methods
+        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
         {
-            Type nodeType = Type.GetType($"DialogueTreePlanter.Elements.DialogueNode{dialogueType}");
-            DialogueNodeBase node = Activator.CreateInstance( nodeType ) as DialogueNodeBase;
-            node.Initialize(position);
-            node.Draw();
-            return node;
-        }
+            List<Port> compatiablePorts = new List<Port>();
+            ports.ForEach(port =>
+            {
+                if(startPort.node == port.node)
+                {
+                    return;
+                }
 
+                if(startPort.direction == port.direction)
+                {
+                    return;
+                }
+
+                compatiablePorts.Add(port);
+            });
+            return compatiablePorts;
+        }
+        #endregion
+
+        #region Manipulators
         private void AddManipulators()
         {
             this.AddManipulator(new ContentDragger());
@@ -35,6 +53,7 @@ namespace DialogueTreePlanter.Windows
             this.AddManipulator(CreateNodeContextualMenu("Add Node (Multiple Choice)", DialogueType.MultipleChoice));
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
+            this.AddManipulator(CreateGroupContextualMenu());
         }
 
         private IManipulator CreateNodeContextualMenu(string actionTitle, DialogueType dialogueType)
@@ -45,6 +64,38 @@ namespace DialogueTreePlanter.Windows
             return menuManipulator;
         }
 
+        private IManipulator CreateGroupContextualMenu()
+        {
+            ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator(
+                menuEvent => menuEvent.menu.AppendAction("Add Group", actionEvent => AddElement(CreateGroup("Dialogue Group", actionEvent.eventInfo.mousePosition))));
+
+            return menuManipulator;
+        }
+        #endregion
+
+        #region Elements Creation
+        // Dev note: Please move the create node functionality into a factory class
+        private DialogueNodeBase CreateNode(DialogueType dialogueType, Vector2 position)
+        {
+            Type nodeType = Type.GetType($"DialogueTreePlanter.Elements.DialogueNode{dialogueType}");
+            DialogueNodeBase node = Activator.CreateInstance(nodeType) as DialogueNodeBase;
+            node.Initialize(position);
+            node.Draw();
+            return node;
+        }
+
+        private Group CreateGroup(string title, Vector2 mousePosition)
+        {
+            Group group = new Group()
+            {
+                title = title
+            };
+            group.SetPosition(new Rect(mousePosition, Vector2.zero));
+            return group;
+        }
+        #endregion
+
+        #region Elements Addition
         private void AddGridBackground()
         {
             GridBackground gridBackground = new GridBackground();
@@ -54,10 +105,10 @@ namespace DialogueTreePlanter.Windows
 
         private void AddStyles()
         {
-            StyleSheet graphStyleSheet = EditorGUIUtility.Load("DialogueTreePlanter/DialogueTreeGraphViewStyles.uss") as StyleSheet;
-            StyleSheet nodeStyleSheet = EditorGUIUtility.Load("DialogueTreePlanter/DialogueTreeNodeStyles.uss") as StyleSheet;
-            styleSheets.Add(graphStyleSheet);
-            styleSheets.Add(nodeStyleSheet);
+            this.AddStyleSheets(
+                "DialogueTreePlanter/DialogueTreeGraphViewStyles.uss",
+                "DialogueTreePlanter/DialogueTreeNodeStyles.uss");
         }
+        #endregion
     }
 }

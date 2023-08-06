@@ -2,6 +2,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+using DialogueTreePlanter.Utilities;
+
 namespace DialogueTreePlanter.Windows
 {
     public class DialogueTreeWindow : EditorWindow
@@ -19,6 +21,7 @@ namespace DialogueTreePlanter.Windows
             AddStyles();
         }
 
+        #region Elements Addition
         private void AddGraphView()
         {
             DialogueTreeGraphView graphView = new DialogueTreeGraphView();
@@ -28,8 +31,8 @@ namespace DialogueTreePlanter.Windows
 
         private void AddStyles()
         {
-            StyleSheet styleSheet = EditorGUIUtility.Load("DialogueTreePlanter/DialogueTreeVariables.uss") as StyleSheet;
-            rootVisualElement.styleSheets.Add(styleSheet);
+            rootVisualElement.AddStyleSheets("DialogueTreePlanter/DialogueTreeVariables.uss");
         }
+        #endregion
     }
 }

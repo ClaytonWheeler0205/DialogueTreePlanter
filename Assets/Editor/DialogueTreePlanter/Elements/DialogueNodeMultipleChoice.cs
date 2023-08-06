@@ -2,6 +2,7 @@ using UnityEngine;
 using DialogueTreePlanter.Enumerations;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using DialogueTreePlanter.Utilities;
 
 namespace DialogueTreePlanter.Elements
 {
@@ -18,10 +19,12 @@ namespace DialogueTreePlanter.Elements
         {
             base.Draw();
 
-            Button addChoiceButton = new Button()
+            Button addChoiceButton = ElementUtility.CreateButton("Add Choice", () => 
             {
-                text = "Add Choice"
-            };
+                Port choicePort = CreateChoicePort("New Choice");
+                Choices.Add("New Choice");
+                outputContainer.Add(choicePort);
+            });
 
             addChoiceButton.AddToClassList("dtp-node__button");
 
@@ -29,30 +32,32 @@ namespace DialogueTreePlanter.Elements
 
             foreach (string choice in Choices)
             {
-                Port choicePort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
-                choicePort.portName = "";
-
-                Button deleteChoiceButton = new Button()
-                {
-                    text = "X"
-                };
-
-                deleteChoiceButton.AddToClassList("dtp-node__button");
-
-                TextField choiceTextField = new TextField()
-                {
-                    value = choice
-                };
-
-                choiceTextField.AddToClassList("dtp-node__textfield");
-                choiceTextField.AddToClassList("dtp-node__choice-textfield");
-                choiceTextField.AddToClassList("dtp-node__textfield__hidden");
-
-                choicePort.Add(choiceTextField);
-                choicePort.Add(deleteChoiceButton);
+                Port choicePort = CreateChoicePort(choice);
                 outputContainer.Add(choicePort);
             }
             RefreshExpandedState();
         }
+
+        #region Elements Creation
+        private Port CreateChoicePort(string choice)
+        {
+            Port choicePort = this.CreatePort();
+
+            Button deleteChoiceButton = ElementUtility.CreateButton("X");
+
+            deleteChoiceButton.AddToClassList("dtp-node__button");
+
+            TextField choiceTextField = ElementUtility.CreateTextField(choice);
+
+            choiceTextField.AddClasses(
+                "dtp-node__textfield",
+                "dtp-node__choice-textfield",
+                "dtp-node__textfield__hidden");
+
+            choicePort.Add(choiceTextField);
+            choicePort.Add(deleteChoiceButton);
+            return choicePort;
+        }
+        #endregion
     }
 }
