@@ -24,7 +24,7 @@ namespace DialogueTreePlanter.Windows
         #region Elements Addition
         private void AddGraphView()
         {
-            DialogueTreeGraphView graphView = new DialogueTreeGraphView();
+            DialogueTreeGraphView graphView = new DialogueTreeGraphView(this);
             graphView.StretchToParentSize();
             rootVisualElement.Add(graphView);
         }

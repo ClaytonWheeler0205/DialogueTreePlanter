@@ -15,9 +15,13 @@ namespace DialogueTreePlanter.Windows
 {
     public class DialogueTreeGraphView : GraphView
     {
-        public DialogueTreeGraphView()
+        private DialogueTreeWindow _editorWindow;
+        private DialogueTreeSearchWindow _searchWindow;
+        public DialogueTreeGraphView(DialogueTreeWindow editorWindow)
         {
+            _editorWindow = editorWindow;
             AddManipulators();
+            AddSearchWindow();
             AddGridBackground();
             AddStyles();
         }
@@ -59,7 +63,7 @@ namespace DialogueTreePlanter.Windows
         private IManipulator CreateNodeContextualMenu(string actionTitle, DialogueType dialogueType)
         {
             ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator(
-                menuEvent => menuEvent.menu.AppendAction(actionTitle, actionEvent => AddElement(CreateNode(dialogueType, actionEvent.eventInfo.mousePosition))));
+                menuEvent => menuEvent.menu.AppendAction(actionTitle, actionEvent => AddElement(CreateNode(dialogueType, GetLocalMousePosition(actionEvent.eventInfo.mousePosition)))));
 
             return menuManipulator;
         }
@@ -67,7 +71,7 @@ namespace DialogueTreePlanter.Windows
         private IManipulator CreateGroupContextualMenu()
         {
             ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator(
-                menuEvent => menuEvent.menu.AppendAction("Add Group", actionEvent => AddElement(CreateGroup("Dialogue Group", actionEvent.eventInfo.mousePosition))));
+                menuEvent => menuEvent.menu.AppendAction("Add Group", actionEvent => AddElement(CreateGroup("Dialogue Group", GetLocalMousePosition(actionEvent.eventInfo.mousePosition)))));
 
             return menuManipulator;
         }
@@ -75,7 +79,7 @@ namespace DialogueTreePlanter.Windows
 
         #region Elements Creation
         // Dev note: Please move the create node functionality into a factory class
-        private DialogueNodeBase CreateNode(DialogueType dialogueType, Vector2 position)
+        public DialogueNodeBase CreateNode(DialogueType dialogueType, Vector2 position)
         {
             Type nodeType = Type.GetType($"DialogueTreePlanter.Elements.DialogueNode{dialogueType}");
             DialogueNodeBase node = Activator.CreateInstance(nodeType) as DialogueNodeBase;
@@ -84,7 +88,7 @@ namespace DialogueTreePlanter.Windows
             return node;
         }
 
-        private Group CreateGroup(string title, Vector2 mousePosition)
+        public Group CreateGroup(string title, Vector2 mousePosition)
         {
             Group group = new Group()
             {
@@ -108,6 +112,30 @@ namespace DialogueTreePlanter.Windows
             this.AddStyleSheets(
                 "DialogueTreePlanter/DialogueTreeGraphViewStyles.uss",
                 "DialogueTreePlanter/DialogueTreeNodeStyles.uss");
+        }
+
+        private void AddSearchWindow()
+        {
+            if(_searchWindow == null)
+            {
+                _searchWindow = ScriptableObject.CreateInstance<DialogueTreeSearchWindow>();
+                _searchWindow.Initialize(this);
+            }
+
+            nodeCreationRequest = context => SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), _searchWindow);
+        }
+        #endregion
+
+        #region Utilities
+        public Vector2 GetLocalMousePosition(Vector2 mousePosition, bool isSearchWindow = false)
+        {
+            Vector2 worldMousePosition = mousePosition;
+            if (isSearchWindow)
+            {
+                worldMousePosition -= _editorWindow.position.position;
+            }
+            Vector2 localMousePosition = contentViewContainer.WorldToLocal(worldMousePosition);
+            return localMousePosition;
         }
         #endregion
     }
