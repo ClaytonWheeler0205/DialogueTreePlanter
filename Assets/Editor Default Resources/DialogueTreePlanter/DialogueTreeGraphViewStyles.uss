@@ -1,0 +1,7 @@
+GridBackground
+{
+	--grid-background-color: var(--dtp-colors-grid-background);
+	--line-color: var(--dtp-colors-grid-lines);
+	--thick-line-color: var(--dtp-colors-grid-thick-lines);
+	--spacing: var(--dtp-metrics-grid-spacing);
+}
