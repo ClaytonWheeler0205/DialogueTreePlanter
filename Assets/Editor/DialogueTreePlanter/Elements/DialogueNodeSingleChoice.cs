@@ -4,15 +4,16 @@ using UnityEngine;
 using DialogueTreePlanter.Enumerations;
 using UnityEditor.Experimental.GraphView;
 using DialogueTreePlanter.Utilities;
+using DialogueTreePlanter.Windows;
 
 namespace DialogueTreePlanter.Elements
 {
     public class DialogueNodeSingleChoice : DialogueNodeBase
     {
 
-        public override void Initialize(Vector2 position)
+        public override void Initialize(DialogueTreeGraphView graphView, Vector2 position)
         {
-            base.Initialize(position);
+            base.Initialize(graphView, position);
             DialogueNodeType = DialogueType.SingleChoice;
             Choices.Add("Next Dialogue");
         }

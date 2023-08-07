@@ -3,14 +3,15 @@ using DialogueTreePlanter.Enumerations;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using DialogueTreePlanter.Utilities;
+using DialogueTreePlanter.Windows;
 
 namespace DialogueTreePlanter.Elements
 {
     public class DialogueNodeMultipleChoice : DialogueNodeBase
     {
-        public override void Initialize(Vector2 position)
+        public override void Initialize(DialogueTreeGraphView graphView, Vector2 position)
         {
-            base.Initialize(position);
+            base.Initialize(graphView, position);
             DialogueNodeType = DialogueType.MultipleChoice;
             Choices.Add("New choice");
         }
