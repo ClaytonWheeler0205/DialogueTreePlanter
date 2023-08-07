@@ -86,7 +86,7 @@ namespace DialogueTreePlanter.Windows
         private IManipulator CreateGroupContextualMenu()
         {
             ContextualMenuManipulator menuManipulator = new ContextualMenuManipulator(
-                menuEvent => menuEvent.menu.AppendAction("Add Group", actionEvent => AddElement(CreateGroup("Dialogue Group", GetLocalMousePosition(actionEvent.eventInfo.mousePosition)))));
+                menuEvent => menuEvent.menu.AppendAction("Add Group", actionEvent => CreateGroup("Dialogue Group", GetLocalMousePosition(actionEvent.eventInfo.mousePosition))));
 
             return menuManipulator;
         }
@@ -110,6 +110,17 @@ namespace DialogueTreePlanter.Windows
         {
             DialogueTreeGroup group = new DialogueTreeGroup(title, mousePosition);
             AddGroup(group);
+            AddElement(group);
+
+            foreach(GraphElement selectedElement in selection)
+            {
+                if(!(selectedElement is DialogueNodeBase)){
+                    continue;
+                }
+
+                DialogueNodeBase node = selectedElement as DialogueNodeBase;
+                group.AddElement(node);
+            }
             return group;
         }
 
@@ -119,9 +130,11 @@ namespace DialogueTreePlanter.Windows
         private void OnElementsDeleted()
         {
             Type groupType = typeof(DialogueTreeGroup);
+            Type edgeType = typeof(Edge);
             deleteSelection = (operationName, askUser) =>
             {
                 List<DialogueTreeGroup> groupsToDelete = new List<DialogueTreeGroup>();
+                List<Edge> edgesToDelete = new List<Edge>();
                 List<DialogueNodeBase> nodesToDelete = new List<DialogueNodeBase>();
                 foreach(GraphElement element in selection)
                 {
@@ -131,20 +144,39 @@ namespace DialogueTreePlanter.Windows
                         continue;
                     }
 
+                    if(element.GetType() == edgeType)
+                    {
+                        Edge edge = element as Edge;
+                        edgesToDelete.Add(edge);
+                        continue;
+                    }
+
                     if(element.GetType() != groupType)
                     {
                         continue;
                     }
 
                     DialogueTreeGroup group = element as DialogueTreeGroup;
-                    RemoveGroup(group);
                     groupsToDelete.Add(group);
                 }
 
                 foreach (DialogueTreeGroup group in groupsToDelete)
                 {
+                    List<DialogueNodeBase> groupNodes = new List<DialogueNodeBase>();
+                    foreach(GraphElement groupElement in group.containedElements)
+                    {
+                        if(!(groupElement is DialogueNodeBase))
+                        {
+                            continue;
+                        }
+                        DialogueNodeBase groupNode = groupElement as DialogueNodeBase;
+                        groupNodes.Add(groupNode);
+                    }
+                    group.RemoveElements(groupNodes);
+                    RemoveGroup(group);
                     RemoveElement(group);
                 }
+                DeleteElements(edgesToDelete);
                 foreach (DialogueNodeBase node in nodesToDelete)
                 {
                     if(node.Group != null)
@@ -152,6 +184,7 @@ namespace DialogueTreePlanter.Windows
                         node.Group.RemoveElement(node);
                     }
                     RemoveUngroupedNode(node);
+                    node.DisconnectAllPorts();
                     RemoveElement(node);
                 }
             };

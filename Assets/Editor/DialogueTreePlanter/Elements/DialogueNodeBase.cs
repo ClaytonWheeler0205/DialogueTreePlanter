@@ -44,6 +44,15 @@ namespace DialogueTreePlanter.Elements
             _defaultBackgroundColor = mainContainer.style.backgroundColor;
         }
 
+        #region Overrided Methods
+        public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+        {
+            evt.menu.AppendAction("Disconnect Input Ports", actionEvent => DisconnectPorts(inputContainer));
+            evt.menu.AppendAction("Disconnect Output Ports", actionEvent => DisconnectPorts(outputContainer));
+            base.BuildContextualMenu(evt);
+        }
+        #endregion
+
         public virtual void Draw()
         {
             // Title container
@@ -98,6 +107,26 @@ namespace DialogueTreePlanter.Elements
             extensionContainer.Add(customDataContainer);
         }
 
+        #region Utility Methods
+        public void DisconnectAllPorts()
+        {
+            DisconnectPorts(inputContainer);
+            DisconnectPorts(outputContainer);
+        }
+
+        private void DisconnectPorts(VisualElement container)
+        {
+            foreach(Port port in container.Children())
+            {
+                if (!port.connected)
+                {
+                    continue;
+                }
+
+                _graphView.DeleteElements(port.connections);
+            }
+        }
+
         public void SetErrorStyle(Color color)
         {
             mainContainer.style.backgroundColor = color;
@@ -107,5 +136,6 @@ namespace DialogueTreePlanter.Elements
         {
             mainContainer.style.backgroundColor = _defaultBackgroundColor;
         }
+        #endregion
     }
 }

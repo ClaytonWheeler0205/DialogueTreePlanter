@@ -61,8 +61,7 @@ namespace DialogueTreePlanter.Windows
                     _graphView.AddElement(multipleChoiceNode);
                     return true;
                 case Group _:
-                    DialogueTreeGroup group = _graphView.CreateGroup("DialogueGroup", context.screenMousePosition);
-                    _graphView.AddElement(group);
+                    _graphView.CreateGroup("DialogueGroup", context.screenMousePosition);
                     return true;
                 default:
                     return false;
